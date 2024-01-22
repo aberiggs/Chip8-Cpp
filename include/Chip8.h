@@ -11,7 +11,7 @@
 class Chip8 {
 public:
     // Initialize a Chip8 instance
-    Chip8(std::string_view romName);
+    Chip8(const std::string& rom_name);
 
 private:
     static constexpr std::size_t kRamSize {0x1000};
