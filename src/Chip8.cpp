@@ -1,8 +1,13 @@
 #include "../include/Chip8.h"
 
+
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <thread>
+
+#include <chrono>
+#include "../include/Instruction.h"
 
 constexpr std::array<uint16_t, 80> chip8_fontset = {
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -27,6 +32,8 @@ Chip8::Chip8(const std::string& rom_name)
   : cpu_ {}
   , memory_ {}
   , display_ {} {
+    // Code to initialize the interpreter
+
     // Set program counter where rom will be loaded
     cpu_.pc = 0x200;
 
@@ -59,4 +66,25 @@ Chip8::Chip8(const std::string& rom_name)
     delete[] rom_buff;
 
     std::cout << "Chip8 successfully initialized. Launching: " << rom_name << "\n";
+}
+
+void Chip8::Play() {
+    // Each run of the loop is 1 emulation cycle
+    while (true) {
+        unsigned int currentOpcode = memory_[cpu_.pc] << 8 | memory_[cpu_.pc + 1];
+
+        Instruction *currentInstruction = new Instruction(currentOpcode, cpu_, memory_, display_);
+        currentInstruction->Execute();
+
+        // De-increment timers as necessary
+        if (cpu_.t_delay > 0) {
+            --cpu_.t_delay;
+        }
+        if (cpu_.t_sound > 0) {
+            std::cout << "BEEP";
+            --cpu_.t_sound;
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(kDelayRate));
+    }
 }
