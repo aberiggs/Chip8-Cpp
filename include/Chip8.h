@@ -5,8 +5,9 @@
 #include <cstddef>
 #include <string_view>
 
-#include "./Cpu.h"
-#include "./Display.h"
+#include "Cpu.h"
+#include "Memory.h"
+#include "Display.h"
 
 class Chip8 {
 public:
@@ -19,7 +20,7 @@ private:
     // Cpu of the interpreter. Contains registers along with other information.
     Cpu cpu_ {};
     // The Chip8's memory. Programs start at 0x200.
-    std::array<uint8_t, kRamSize> memory_ {};
+    Memory memory_ {};
     // The display for this instance of the Chip8 interpreter
     Display display_ {};
 

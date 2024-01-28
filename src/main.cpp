@@ -5,7 +5,7 @@
 
 int main() {
     std::cout << "Welcome to Sprocket's Chip8 Emulator!\n";
-    std::cout << "Rom to load: ";
+    std::cout << "Rom to load (path): ";
     std::string rom_name {};
     std::cin >> rom_name;
 
