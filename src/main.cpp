@@ -10,5 +10,6 @@ int main() {
     std::cin >> rom_name;
 
     Chip8 ch8 {rom_name};
+    ch8.Play();
     
 }

@@ -71,10 +71,10 @@ Chip8::Chip8(const std::string& rom_name)
 void Chip8::Play() {
     // Each run of the loop is 1 emulation cycle
     while (true) {
-        unsigned int currentOpcode = memory_[cpu_.pc] << 8 | memory_[cpu_.pc + 1];
+        unsigned short currentOpcode = memory_[cpu_.pc] << 8 | memory_[cpu_.pc + 1];
 
-        Instruction *currentInstruction = new Instruction(currentOpcode, cpu_, memory_, display_);
-        currentInstruction->Execute();
+        Instruction currentInstruction {currentOpcode, cpu_, memory_, display_};
+        // currentInstruction.Execute();
 
         // De-increment timers as necessary
         if (cpu_.t_delay > 0) {

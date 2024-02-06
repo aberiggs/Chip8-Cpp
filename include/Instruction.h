@@ -9,22 +9,22 @@
 
 class Instruction {
 public:
-    Instruction(unsigned short opcode, Cpu& c8_cpu, Memory& ch8_memory, Display& ch8_display);
+    Instruction(unsigned short opcode, const Cpu& c8_cpu, const Memory& ch8_memory, const Display& ch8_display);
     void Execute();
 
 private:
     // Ref to the CPU of the Ch8 instance for this instruction.
-    Cpu& cpu_; 
+    const Cpu& cpu_; 
     // Ref to the memory of the Ch8 instance for this instruction.
-    Memory& memory_;
+    const Memory& memory_;
     // Ref to the display of the Ch8 instance for this instruction.
-    Display& display_;
+    const Display& display_;
     // Original opcode
     unsigned short opcode_;
 
     typedef void (Instruction::*InstructionMemFn) (void);
     // Pointer to the instruction to be executed.
-    InstructionMemFn instruction_ {Instruction::UndefinedInstruction};
+    InstructionMemFn instruction_ {&Instruction::UndefinedInstruction};
 
 
     inline unsigned short ADDR_() {
@@ -45,10 +45,7 @@ private:
         return (opcode_ & 0xFF);
     }
     
-
-    
     void UndefinedInstruction();
-
     void CLS();
     void RET();
     void JP_ADDR();
