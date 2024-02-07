@@ -38,3 +38,11 @@ void Display::Draw() {
     }
     SDL_RenderPresent(renderer_); // Display the changes
 }
+
+uint16_t& Display::operator[] (std::size_t index) {
+    return screen_[index];
+}
+
+Display::ScreenArrayT& Display::Screen() {
+    return screen_;
+}

@@ -5,10 +5,10 @@
 
 struct Cpu {
     // Program counter.
-    uint16_t pc;
+    uint16_t pc {};
     // Stack pointer.
-    uint8_t sp;
-    // Array of 8-bit registers that are refered to as 'Vx'.
+    uint8_t sp {};
+    // Array of 8-bit registers that are referred to as 'Vx'.
     std::array<uint8_t, 0x10> V {};
     // Stack to contain addresses to return to following subroutines.
     std::array<uint16_t, 0x10> stack {};

@@ -34,8 +34,11 @@ Chip8::Chip8(const std::string& rom_name)
   , display_ {} {
     // Code to initialize the interpreter
 
-    // Set program counter where rom will be loaded
+    // Set program counter where rom will be loaded (0x200)
     cpu_.pc = 0x200;
+
+    // Ensure that stack pointer is at base of the stack
+    cpu_.sp = 0;
 
     // Load the fontset
     for (std::size_t i = 0; i < chip8_fontset.size(); ++i) {
@@ -71,11 +74,13 @@ Chip8::Chip8(const std::string& rom_name)
 void Chip8::Play() {
     // Each run of the loop is 1 emulation cycle
     while (true) {
-        unsigned short currentOpcode = memory_[cpu_.pc] << 8 | memory_[cpu_.pc + 1];
+        uint16_t currentOpcode = memory_[cpu_.pc] << 8 | memory_[cpu_.pc + 1];
+        
+        //std::cout << "Opcode: " << currentOpcode << "\n";
 
         Instruction currentInstruction {currentOpcode, cpu_, memory_, display_};
-        // currentInstruction.Execute();
-
+        currentInstruction.Execute();
+    
         // De-increment timers as necessary
         if (cpu_.t_delay > 0) {
             --cpu_.t_delay;
@@ -86,5 +91,6 @@ void Chip8::Play() {
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(kDelayRate));
+        cpu_.pc += 2;
     }
 }

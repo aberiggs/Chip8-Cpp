@@ -9,39 +9,40 @@
 
 class Instruction {
 public:
-    Instruction(unsigned short opcode, const Cpu& c8_cpu, const Memory& ch8_memory, const Display& ch8_display);
+    Instruction(uint16_t opcode, Cpu& c8_cpu, Memory& ch8_memory, Display& ch8_display);
     void Execute();
 
 private:
-    // Ref to the CPU of the Ch8 instance for this instruction.
-    const Cpu& cpu_; 
-    // Ref to the memory of the Ch8 instance for this instruction.
-    const Memory& memory_;
-    // Ref to the display of the Ch8 instance for this instruction.
-    const Display& display_;
     // Original opcode
-    unsigned short opcode_;
+    uint16_t opcode_;
+    // Ref to the CPU of the Ch8 instance for this instruction.
+    Cpu& cpu_; 
+    // Ref to the memory of the Ch8 instance for this instruction.
+    Memory& memory_;
+    // Ref to the display of the Ch8 instance for this instruction.
+    Display& display_;
+
 
     typedef void (Instruction::*InstructionMemFn) (void);
     // Pointer to the instruction to be executed.
     InstructionMemFn instruction_ {&Instruction::UndefinedInstruction};
 
 
-    inline unsigned short ADDR_() {
+    inline uint16_t ADDR_() {
         return (opcode_);
     }
 
-    inline unsigned short N_() {
+    inline uint16_t N_() {
         return (opcode_ & 0xFFF);
     }
         
-    inline unsigned short X_() {
-        return (opcode_ & 0xF00) >> 8;
+    inline uint16_t X_() {
+        return ((opcode_ & 0xF00) >> 8);
     }
-    inline unsigned short Y_() {
-        return (opcode_ & 0xF0) >> 4;
+    inline uint16_t Y_() {
+        return ((opcode_ & 0xF0) >> 4);
     }
-    inline unsigned short KK_() {
+    inline uint16_t KK_() {
         return (opcode_ & 0xFF);
     }
     
