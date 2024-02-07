@@ -335,13 +335,13 @@ void Instruction::LD_B_VX() {
 }
 
 void Instruction::LD_I_VX() {
-    for (int i = 0; i < X_(); ++i) {
+    for (int i = 0; i <= X_(); ++i) {
         memory_[cpu_.I + i] = cpu_.V[i];
     }
 }
 
 void Instruction::LD_VX_I() {
-    for (int i = 0; i < X_(); ++i) {
+    for (int i = 0; i <= X_(); ++i) {
         cpu_.V[i] = memory_[cpu_.I + i];
     }
 }
