@@ -45,6 +45,9 @@ Chip8::Chip8(const std::string& rom_name)
         memory_[i] = chip8_fontset[i];
     }
 
+    /*
+
+
     // Read rom data into a buffer
     std::ifstream rom_stream(rom_name, std::ios::binary);
     if (!rom_stream) {
@@ -67,14 +70,28 @@ Chip8::Chip8(const std::string& rom_name)
     }
 
     delete[] rom_buff;
+    */
+
+    FILE *rom = 0;
+    rom = fopen(rom_name.c_str(), "rb");
+
+    if (!rom) {
+        std::cout << "Failed to open file!\n";
+        return;
+    }
+
+    fread(&memory_[0x200], kRamSize - 0x200, 1, rom);
+
 
     std::cout << "Chip8 successfully initialized. Launching: " << rom_name << "\n";
 }
 
 void Chip8::Play() {
     // Each run of the loop is 1 emulation cycle
-    while (true) {
+    while (cpu_.pc < Memory::kRamSize) {
         uint16_t currentOpcode = memory_[cpu_.pc] << 8 | memory_[cpu_.pc + 1];
+        printf("\nOpcode: 0x%x, pc: %d\n", currentOpcode, cpu_.pc);
+        cpu_.pc += 2;
         
         //std::cout << "Opcode: " << currentOpcode << "\n";
 
@@ -91,6 +108,7 @@ void Chip8::Play() {
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(kDelayRate));
-        cpu_.pc += 2;
     }
+
+    std::cout << "pc @ " << cpu_.pc << "\n";
 }

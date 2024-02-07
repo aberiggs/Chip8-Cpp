@@ -29,11 +29,11 @@ private:
 
 
     inline uint16_t ADDR_() {
-        return (opcode_);
+        return (opcode_ & 0xFFF);
     }
 
     inline uint16_t N_() {
-        return (opcode_ & 0xFFF);
+        return (opcode_ & 0xF);
     }
         
     inline uint16_t X_() {

@@ -131,13 +131,13 @@ Instruction::Instruction(uint16_t opcode, Cpu& c8_cpu, Memory& ch8_memory, Displ
 }
 
 void Instruction::Execute() {
-    std::cout << "Executing instruction: '" << opcode_ << "'\n";
+    //std::cout << "Executing instruction: '" << opcode_ << "'\n";
     (this->*instruction_)();
 }
 
 void Instruction::UndefinedInstruction() {
     //TODO: Maybe throw exception to be caught further up?
-    std::cout << "Instruction '" <<  opcode_ << "' undefined...\n";
+    //std::cout << "Instruction '" <<  opcode_ << "' undefined...\n";
 }
 
 void Instruction::CLS() {
@@ -277,6 +277,7 @@ void Instruction::DRW_VX_VY_N() {
 
     cpu_.V[0xF] = 0;
 
+    
     for (int i = 0; i < height; i++) {
         pixel = memory_[cpu_.I + i];
         for (int j = 0; j < 8; j++) {
@@ -310,7 +311,7 @@ void Instruction::LD_VX_K() {
 }
 
 void Instruction::LD_DT_VX() {
-
+    cpu_.t_delay = cpu_.V[X_()];
 }
 
 void Instruction::LD_ST_VX() {
@@ -322,7 +323,7 @@ void Instruction::ADD_I_VX() {
 }
 
 void Instruction::LD_F_VX() {
-    //cpu_.I = 0x000 + 5*(cpu_.V[X_()]);
+    cpu_.I = 5*(cpu_.V[X_()]);
 }
 
 void Instruction::LD_B_VX() {

@@ -13,6 +13,18 @@ Display::Display()
         return;
     }
 
+    if (window_ == NULL) {
+        std::cout << "Failed to create window\n";
+        return;
+    }
+
+    if (renderer_ == NULL) {
+        std::cout << "Failed to create renderer\n";
+        return;
+    }
+
+    // SDL_SetRenderDrawColor(renderer_, 40, 40, 40, 255);  // Set initial background color
+
     SDL_RenderClear(renderer_);  
 }
 
