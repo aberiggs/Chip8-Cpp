@@ -5,12 +5,12 @@ TARGET := Chip8
 SRCS := $(wildcard ./src/*.cpp)
 OBJS := $(patsubst ./src/%.cpp,./output/%.o,$(SRCS))
 
-all: $(TARGET)
+all: output $(TARGET)
 
 $(TARGET): $(OBJS)
 	$(CC) -o $@.out $^ `sdl2-config --cflags --libs`
 
-./output/%.o: ./src/%.cpp output
+./output/%.o: ./src/%.cpp 
 	$(CC) $(CFLAGS) -c $< -o $@
 
 output:

@@ -45,37 +45,11 @@ Chip8::Chip8(const std::string& rom_name)
         memory_[i] = chip8_fontset[i];
     }
 
-    /*
-
-
-    // Read rom data into a buffer
-    std::ifstream rom_stream(rom_name, std::ios::binary);
-    if (!rom_stream) {
-        // TODO: Some exception
-        std::cout << "Failed to open file!\n";
-        return;
-    }
-    char* rom_buff = new char[kRamSize - 0x200];
-    rom_stream.readsome(rom_buff, kRamSize - 0x200);
-    
-    if (!rom_stream) {
-        // TODO: Some other exception
-        std::cout << "Failed to read stream into buffer!\n";
-        return;
-    }
-
-    // Copy rom data into memory
-    for (std::size_t i = 0x200; i < kRamSize; ++i ) {
-        memory_[i] = rom_buff[i - 0x200];
-    }
-
-    delete[] rom_buff;
-    */
-
     FILE *rom = 0;
     rom = fopen(rom_name.c_str(), "rb");
 
     if (!rom) {
+        // TODO: Some exception
         std::cout << "Failed to open file!\n";
         return;
     }
@@ -88,12 +62,9 @@ Chip8::Chip8(const std::string& rom_name)
 
 void Chip8::Play() {
     // Each run of the loop is 1 emulation cycle
-    while (cpu_.pc < Memory::kRamSize) {
+    while (cpu_.pc < Memory::kRamSize - 1) {
         uint16_t currentOpcode = memory_[cpu_.pc] << 8 | memory_[cpu_.pc + 1];
-        printf("\nOpcode: 0x%x, pc: %d\n", currentOpcode, cpu_.pc);
         cpu_.pc += 2;
-        
-        //std::cout << "Opcode: " << currentOpcode << "\n";
 
         Instruction currentInstruction {currentOpcode, cpu_, memory_, display_};
         currentInstruction.Execute();
@@ -107,8 +78,14 @@ void Chip8::Play() {
             --cpu_.t_sound;
         }
 
+        SDL_Event event {};
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_QUIT:
+                    return;
+            }
+        }
+
         std::this_thread::sleep_for(std::chrono::milliseconds(kDelayRate));
     }
-
-    std::cout << "pc @ " << cpu_.pc << "\n";
 }

@@ -131,13 +131,12 @@ Instruction::Instruction(uint16_t opcode, Cpu& c8_cpu, Memory& ch8_memory, Displ
 }
 
 void Instruction::Execute() {
-    //std::cout << "Executing instruction: '" << opcode_ << "'\n";
+    printf("Executing: 0x%4x | pc @ %d\n", opcode_, cpu_.pc);
     (this->*instruction_)();
 }
 
 void Instruction::UndefinedInstruction() {
-    //TODO: Maybe throw exception to be caught further up?
-    //std::cout << "Instruction '" <<  opcode_ << "' undefined...\n";
+    std::cout << "Instruction Undefined...\n";
 }
 
 void Instruction::CLS() {
@@ -212,42 +211,37 @@ void Instruction::XOR_VX_VY() {
 
 void Instruction::ADD_VX_VY() {
     // TODO: Test this casting
-    uint16_t res { static_cast<uint16_t>(cpu_.V[X_()] +  cpu_.V[Y_()])};
-    if (res > 255)
-        cpu_.V[0xF] = 1;
+    uint16_t res {static_cast<uint16_t>(cpu_.V[X_()] + cpu_.V[Y_()])};
     cpu_.V[X_()] = res & (0xFF);
+    cpu_.V[0xF]  = (res > 255) ? 1 : 0;
 }
 
 void Instruction::SUB_VX_VY() {
-    // VF = NOT borrow
-    if (cpu_.V[X_()] > cpu_.V[Y_()])  // If we don't need to borrow
-        cpu_.V[0xF] = 1;
-    else
-        cpu_.V[0xF] = 0;
-
+    bool not_borrow = cpu_.V[X_()] >= cpu_.V[Y_()];
     cpu_.V[X_()] = cpu_.V[X_()] - cpu_.V[Y_()];
+    // VF = NOT borrow
+    cpu_.V[0xF] = static_cast<bool>(not_borrow);
 }
 
 void Instruction::SHR_VX() {
+    uint8_t lsb {static_cast<uint8_t>(cpu_.V[X_()] & 0x1)};
+    cpu_.V[X_()] >>= 1;
     // If LSB is 1 then VF = 1, else VF = 0
-    cpu_.V[0xF] = 0 | (cpu_.V[X_()] & 0x1);
-    cpu_.V[X_()] /= 2;
+    cpu_.V[0xF] = lsb;
 }
 
 void Instruction::SUBN_VX_VY() {
-    // VF = NOT borrow
-    if (cpu_.V[X_()] < cpu_.V[Y_()])  // If we don't need to borrow
-        cpu_.V[0xF] = 1;
-    else
-        cpu_.V[0xF] = 0;
-
+    bool not_borrow = cpu_.V[X_()] <= cpu_.V[Y_()];
     cpu_.V[X_()] = cpu_.V[Y_()] - cpu_.V[X_()];
+    // VF = NOT borrow
+    cpu_.V[0xF] = static_cast<bool>(not_borrow);
 }
 
 void Instruction::SHL_VX() {
+    uint8_t msb {static_cast<uint8_t>(cpu_.V[X_()] >> 7)};
+    cpu_.V[X_()] <<= 1;
     // If MSB is 1 then VF = 1, else VF = 0
-    cpu_.V[0xF] = 0 | (cpu_.V[X_()] & 0x80);
-    cpu_.V[X_()] *= 2;
+    cpu_.V[0xF] = msb;
 }
 
 void Instruction::SNE_VX_VY() {
