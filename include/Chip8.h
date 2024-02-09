@@ -18,8 +18,7 @@ public:
 
 private:
     static constexpr std::size_t kRamSize {0x1000};
-    // Delay rate for each emulation cycle in ms. 1000/60 ~ 60 fps
-    static constexpr int kDelayRate {static_cast<int>(1000/60)};
+    static constexpr int kDelayRate {1200};
    
     // Cpu of the interpreter. Contains registers along with other information.
     Cpu cpu_ {};

@@ -23,9 +23,7 @@ Display::Display()
         return;
     }
 
-    // SDL_SetRenderDrawColor(renderer_, 40, 40, 40, 255);  // Set initial background color
-
-    SDL_RenderClear(renderer_);  
+    Draw();  
 }
 
 Display::~Display() {
@@ -36,11 +34,11 @@ Display::~Display() {
 
 void Display::Draw() {
     // Clear the screen
-    SDL_SetRenderDrawColor(renderer_, 40, 40, 40, 255);
+    SDL_SetRenderDrawColor(renderer_, 40, 40, 40, 255);  // Background color
     SDL_RenderClear(renderer_);
 
     // Draw the graphics
-    SDL_SetRenderDrawColor(renderer_, 170, 230, 255, 255);
+    SDL_SetRenderDrawColor(renderer_, 170, 230, 255, 255);  // Graphics color
     for (int x = 0; x < kRawWidth * kDisplayScale; x++) {
         for (int y = 0; y < kRawHeight * kDisplayScale; y++) {
         if (screen_[(x / kDisplayScale) + (y / kDisplayScale) * 64] == 1) {

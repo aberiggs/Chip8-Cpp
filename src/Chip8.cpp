@@ -61,6 +61,9 @@ Chip8::Chip8(const std::string& rom_name)
 }
 
 void Chip8::Play() {
+    auto time {std::chrono::system_clock::now().time_since_epoch()};
+    auto time_ms {std::chrono::duration_cast<std::chrono::milliseconds>(time).count()};
+
     // Each run of the loop is 1 emulation cycle
     while (cpu_.pc < Memory::kRamSize - 1) {
         uint16_t currentOpcode = memory_[cpu_.pc] << 8 | memory_[cpu_.pc + 1];
@@ -71,8 +74,15 @@ void Chip8::Play() {
     
         // De-increment timers as necessary
         if (cpu_.t_delay > 0) {
-            --cpu_.t_delay;
+            auto new_time {std::chrono::system_clock::now().time_since_epoch()};
+            auto new_time_ms {std::chrono::duration_cast<std::chrono::milliseconds>(new_time).count()};
+            // De-increment @ 60hz
+            if (new_time_ms - time_ms > 1000/60) {
+                --cpu_.t_delay;
+                time_ms = new_time_ms;
+            }
         }
+
         if (cpu_.t_sound > 0) {
             std::cout << "BEEP";
             --cpu_.t_sound;
@@ -93,6 +103,6 @@ void Chip8::Play() {
             }
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(kDelayRate));
+        std::this_thread::sleep_for(std::chrono::microseconds(kDelayRate));
     }
 }

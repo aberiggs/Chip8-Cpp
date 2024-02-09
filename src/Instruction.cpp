@@ -272,8 +272,6 @@ void Instruction::DRW_VX_VY_N() {
     unsigned short pixel = 0;
 
     cpu_.V[0xF] = 0;
-
-    
     for (int i = 0; i < height; i++) {
         pixel = memory_[cpu_.I + i];
         for (int j = 0; j < 8; j++) {
@@ -305,22 +303,37 @@ void Instruction::LD_VX_DT() {
 }
 
 void Instruction::LD_VX_K() {
-    bool key_is_pressed {false};
-    uint8_t key {0};
-    for (; key <= 0xF; ++key) {
-        if (keyboard_.IsPressed(key)) {
-            key_is_pressed = true;
-            break;
+    
+    // Wait for key press
+    uint8_t *keypress_ptr {nullptr};
+    while (keypress_ptr == nullptr) {
+        SDL_Event event {};
+        if(SDL_PollEvent(&event)) {
+            switch (event.type) {
+            case SDL_KEYDOWN:
+                keypress_ptr = keyboard_.CheckInput(event.key.keysym.scancode, true);
+                break;
+            default:
+                break;
+            }
         }
     }
 
-    if (!key_is_pressed) {
-        // Don't continue if no key is pressed
-        cpu_.pc -= 2;
-        return;
+    // Wait for key release
+    uint8_t *keyrelease_ptr {nullptr};
+    while (keyrelease_ptr != keypress_ptr) {
+        SDL_Event event {};
+        SDL_PollEvent(&event);
+        switch (event.type) {
+            case SDL_KEYUP:
+                keyrelease_ptr = keyboard_.CheckInput(event.key.keysym.scancode, false);
+            default:
+                break;
+        }
     }
 
-    cpu_.V[X_()] = key;
+    // This operation gives us the index of the key that was pressed in the list (0x0 - 0xF)
+    cpu_.V[X_()] = static_cast<uint8_t>(keypress_ptr - &keyboard_[0]);
 }
 
 void Instruction::LD_DT_VX() {
