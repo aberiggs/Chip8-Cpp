@@ -5,11 +5,12 @@
 
 #include "Cpu.h"
 #include "Display.h"
+#include "Keyboard.h"
 #include "Memory.h"
 
 class Instruction {
 public:
-    Instruction(uint16_t opcode, Cpu& c8_cpu, Memory& ch8_memory, Display& ch8_display);
+    Instruction(uint16_t opcode, Cpu& c8_cpu, Memory& ch8_memory, Display& ch8_display, Keyboard& ch8_keyboard);
     void Execute();
 
 private:
@@ -21,6 +22,8 @@ private:
     Memory& memory_;
     // Ref to the display of the Ch8 instance for this instruction.
     Display& display_;
+    // Ref to the keyboard of the Ch8 instance for this instruction.
+    Keyboard& keyboard_;
 
 
     typedef void (Instruction::*InstructionMemFn) (void);

@@ -1,10 +1,12 @@
 #include "../include/Instruction.h"
 
-Instruction::Instruction(uint16_t opcode, Cpu& c8_cpu, Memory& ch8_memory, Display& ch8_display)
+Instruction::Instruction(uint16_t opcode, Cpu& c8_cpu, Memory& ch8_memory, 
+                         Display& ch8_display, Keyboard& ch8_keyboard)
   : opcode_ {opcode}
   , cpu_ {c8_cpu}
   , memory_ {ch8_memory}
-  , display_ {ch8_display} {
+  , display_ {ch8_display}
+  , keyboard_ {ch8_keyboard} {
     // Parse opcode
     switch (opcode_ & 0xF000) {
         case 0x0000:
@@ -289,19 +291,36 @@ void Instruction::DRW_VX_VY_N() {
 }
 
 void Instruction::SKP_VX() {
-    
+    if (keyboard_.IsPressed(cpu_.V[X_()]))
+        cpu_.pc += 2;
 }
 
 void Instruction::SKNP_VX() {
-
+    if (!keyboard_.IsPressed(cpu_.V[X_()]))
+        cpu_.pc += 2;
 }
 
 void Instruction::LD_VX_DT() {
-
+    cpu_.V[X_()] = cpu_.t_delay;
 }
 
 void Instruction::LD_VX_K() {
+    bool key_is_pressed {false};
+    uint8_t key {0};
+    for (; key <= 0xF; ++key) {
+        if (keyboard_.IsPressed(key)) {
+            key_is_pressed = true;
+            break;
+        }
+    }
 
+    if (!key_is_pressed) {
+        // Don't continue if no key is pressed
+        cpu_.pc -= 2;
+        return;
+    }
+
+    cpu_.V[X_()] = key;
 }
 
 void Instruction::LD_DT_VX() {
@@ -309,7 +328,7 @@ void Instruction::LD_DT_VX() {
 }
 
 void Instruction::LD_ST_VX() {
-
+    cpu_.t_sound = cpu_.V[X_()];
 }
 
 void Instruction::ADD_I_VX() {

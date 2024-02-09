@@ -1,12 +1,11 @@
 #include "../include/Chip8.h"
 
-
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <iterator>
 #include <thread>
 
-#include <chrono>
 #include "../include/Instruction.h"
 
 constexpr std::array<uint16_t, 80> chip8_fontset = {
@@ -31,7 +30,8 @@ constexpr std::array<uint16_t, 80> chip8_fontset = {
 Chip8::Chip8(const std::string& rom_name)
   : cpu_ {}
   , memory_ {}
-  , display_ {} {
+  , display_ {}
+  , keyboard_ {} {
     // Code to initialize the interpreter
 
     // Set program counter where rom will be loaded (0x200)
@@ -66,7 +66,7 @@ void Chip8::Play() {
         uint16_t currentOpcode = memory_[cpu_.pc] << 8 | memory_[cpu_.pc + 1];
         cpu_.pc += 2;
 
-        Instruction currentInstruction {currentOpcode, cpu_, memory_, display_};
+        Instruction currentInstruction {currentOpcode, cpu_, memory_, display_, keyboard_};
         currentInstruction.Execute();
     
         // De-increment timers as necessary
@@ -83,6 +83,13 @@ void Chip8::Play() {
             switch (event.type) {
                 case SDL_QUIT:
                     return;
+                case SDL_KEYDOWN:
+                    keyboard_.CheckInput(event.key.keysym.scancode, true);
+                    break;
+                case SDL_KEYUP:
+                    keyboard_.CheckInput(event.key.keysym.scancode, false);
+                default:
+                    break;
             }
         }
 

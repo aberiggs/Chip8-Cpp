@@ -6,8 +6,9 @@
 #include <string_view>
 
 #include "Cpu.h"
-#include "Memory.h"
 #include "Display.h"
+#include "Keyboard.h"
+#include "Memory.h"
 
 class Chip8 {
 public:
@@ -26,5 +27,6 @@ private:
     Memory memory_ {};
     // The display for this instance of the Chip8 interpreter
     Display display_ {};
-
+    // The keyboard for this instance of the Chip8 interpreter
+    Keyboard keyboard_ {};
 };
