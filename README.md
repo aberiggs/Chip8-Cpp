@@ -1,7 +1,8 @@
 # Chip-8 Emulator
 An introductory emulator for the simple interpreted language known as Chip-8.
 
-![chip8pong](https://github.com/aberiggs/Chip8-Cpp/assets/34726295/e0d1d86c-eb66-4ec0-a8fb-7239fa37a2c1)
+![chip8pong](https://github.com/aberiggs/Chip8-Cpp/assets/34726295/761db127-1d78-4f43-9042-447fb8a2899e)
+
 
 ## Setup
 I don't have any builds uploaded at the moment, but if you'd like to run this emulator the process of building from source should be fairly easy.
