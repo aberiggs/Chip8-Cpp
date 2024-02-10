@@ -133,7 +133,7 @@ Instruction::Instruction(uint16_t opcode, Cpu& c8_cpu, Memory& ch8_memory,
 }
 
 void Instruction::Execute() {
-    printf("Executing: 0x%4x | pc @ %d\n", opcode_, cpu_.pc);
+    // printf("Executing: 0x%4x | pc @ %d\n", opcode_, cpu_.pc);
     (this->*instruction_)();
 }
 
@@ -142,12 +142,7 @@ void Instruction::UndefinedInstruction() {
 }
 
 void Instruction::CLS() {
-    for (auto& pixel : display_.Screen()) {
-        // Clear pixel
-        pixel = 0;
-    }
-    
-    display_.Draw();
+    display_.Clear();
 }
 
 void Instruction::RET() {
@@ -201,14 +196,17 @@ void Instruction::LD_VX_VY() {
 
 void Instruction::OR_VX_VY(){
     cpu_.V[X_()] |= cpu_.V[Y_()];
+    cpu_.V[0xF] = 0;
 }
 
 void Instruction::AND_VX_VY() {
     cpu_.V[X_()] &= cpu_.V[Y_()];
+    cpu_.V[0xF] = 0;
 }
 
 void Instruction::XOR_VX_VY() {
     cpu_.V[X_()] ^= cpu_.V[Y_()];
+    cpu_.V[0xF] = 0;
 }
 
 void Instruction::ADD_VX_VY() {
@@ -226,6 +224,8 @@ void Instruction::SUB_VX_VY() {
 }
 
 void Instruction::SHR_VX() {
+    // TODO: Rename this function
+    cpu_.V[X_()] = cpu_.V[Y_()];
     uint8_t lsb {static_cast<uint8_t>(cpu_.V[X_()] & 0x1)};
     cpu_.V[X_()] >>= 1;
     // If LSB is 1 then VF = 1, else VF = 0
@@ -240,6 +240,8 @@ void Instruction::SUBN_VX_VY() {
 }
 
 void Instruction::SHL_VX() {
+    // TODO: Rename this function
+    cpu_.V[X_()] = cpu_.V[Y_()];
     uint8_t msb {static_cast<uint8_t>(cpu_.V[X_()] >> 7)};
     cpu_.V[X_()] <<= 1;
     // If MSB is 1 then VF = 1, else VF = 0
@@ -266,21 +268,26 @@ void Instruction::RND_VX_KK() {
 }
 
 void Instruction::DRW_VX_VY_N() {
-    unsigned short x = cpu_.V[X_()];
-    unsigned short y = cpu_.V[Y_()];
-    unsigned short height = N_();
-    unsigned short pixel = 0;
+    uint8_t x {static_cast<uint8_t>(cpu_.V[X_()] % 64)};
+    uint8_t y {static_cast<uint8_t>(cpu_.V[Y_()] % 32)};
+    uint16_t height {N_()};
 
     cpu_.V[0xF] = 0;
-    for (int i = 0; i < height; i++) {
-        pixel = memory_[cpu_.I + i];
-        for (int j = 0; j < 8; j++) {
-            if ((pixel & (0x80 >> j)) != 0 && (x + j + (y + i) * 64)) {
-                if (display_[(x + j + ((y + i) * 64)) % (64 * 32)] == 1) {
-                    // Collision
-                    cpu_.V[0xF] = 1;
-                }
-                display_[x + j + ((y + i) * 64)] ^= 1;
+    for (int row = 0; row < height; ++row) {
+        if (y+row >= Display::kRawHeight)
+            break;
+
+        uint16_t sprite_byte {memory_[cpu_.I + row]};
+        std::bitset<8> pixels = {sprite_byte};
+        for (int bit = 0; bit < 8; ++bit) {
+            if (x+bit >= Display::kRawWidth)
+                break;
+
+            if (pixels[7-bit] == 1 && display_.Coordinate(x+bit, y+row) == 1) {
+                display_.Coordinate(x+bit, y+row) = 0;
+                cpu_.V[0xF] = 1;
+            } else if (pixels[7-bit] == 1) {
+                display_.Coordinate(x+bit, y+row) = 1;
             }
         }
     }
@@ -303,7 +310,6 @@ void Instruction::LD_VX_DT() {
 }
 
 void Instruction::LD_VX_K() {
-    
     // Wait for key press
     uint8_t *keypress_ptr {nullptr};
     while (keypress_ptr == nullptr) {
@@ -313,6 +319,9 @@ void Instruction::LD_VX_K() {
             case SDL_KEYDOWN:
                 keypress_ptr = keyboard_.CheckInput(event.key.keysym.scancode, true);
                 break;
+            case SDL_QUIT:
+                SDL_PushEvent(&event);
+                return;
             default:
                 break;
             }
@@ -327,6 +336,9 @@ void Instruction::LD_VX_K() {
         switch (event.type) {
             case SDL_KEYUP:
                 keyrelease_ptr = keyboard_.CheckInput(event.key.keysym.scancode, false);
+            case SDL_QUIT:
+                SDL_PushEvent(&event);
+                return;
             default:
                 break;
         }
@@ -362,12 +374,12 @@ void Instruction::LD_B_VX() {
 
 void Instruction::LD_I_VX() {
     for (int i = 0; i <= X_(); ++i) {
-        memory_[cpu_.I + i] = cpu_.V[i];
+        memory_[cpu_.I++] = cpu_.V[i];
     }
 }
 
 void Instruction::LD_VX_I() {
     for (int i = 0; i <= X_(); ++i) {
-        cpu_.V[i] = memory_[cpu_.I + i];
+        cpu_.V[i] = memory_[cpu_.I++];
     }
 }

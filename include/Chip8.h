@@ -13,12 +13,13 @@
 class Chip8 {
 public:
     // Initialize a Chip8 instance
-    Chip8(const std::string& rom_name);
+    Chip8();
+    void LoadRom(const std::string& rom_name);
     void Play();
 
 private:
     static constexpr std::size_t kRamSize {0x1000};
-    static constexpr int kDelayRate {1200};
+    static constexpr int kDelayRate {1200/5};
    
     // Cpu of the interpreter. Contains registers along with other information.
     Cpu cpu_ {};

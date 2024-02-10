@@ -2,11 +2,21 @@
 
 #include "../include/Display.h"
 
-Display::Display() 
-  : window_ {SDL_CreateWindow("Sprocket's Chip8 Emulator", SDL_WINDOWPOS_CENTERED,
+Display::~Display() {
+    if (renderer_ != nullptr)
+        SDL_DestroyRenderer(renderer_);
+    if (window_ != nullptr)
+        SDL_DestroyWindow(window_);
+    SDL_Quit();
+}
+
+void Display::Init() {
+    window_ = SDL_CreateWindow("Sprocket's Chip8 Emulator", SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED, kRawWidth*kDisplayScale,
-                              kRawHeight*kDisplayScale, 0)}
-  , renderer_ {SDL_CreateRenderer(window_, -1, 0)} {
+                              kRawHeight*kDisplayScale, 0);
+
+    renderer_ = SDL_CreateRenderer(window_, -1, 0);
+
     if(SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
         std::cout << "Failed to initialize the SDL2 library\n";
@@ -23,13 +33,7 @@ Display::Display()
         return;
     }
 
-    Draw();  
-}
-
-Display::~Display() {
-    SDL_DestroyRenderer(renderer_);
-    SDL_DestroyWindow(window_);
-    SDL_Quit();
+    Clear();
 }
 
 void Display::Draw() {
@@ -49,7 +53,20 @@ void Display::Draw() {
     SDL_RenderPresent(renderer_); // Display the changes
 }
 
+void Display::Clear() {
+    for (auto& pixel : screen_) {
+        // Clear pixel
+        pixel = 0;
+    }
+    Draw();
+}
+
 uint16_t& Display::operator[] (std::size_t index) {
+    return screen_[index];
+}
+
+uint16_t& Display::Coordinate (std::size_t x, std::size_t y) {
+    std::size_t index {y * kRawWidth + x};
     return screen_[index];
 }
 

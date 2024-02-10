@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <stdexcept>
 #include <thread>
 
 #include "../include/Instruction.h"
@@ -27,7 +28,7 @@ constexpr std::array<uint16_t, 80> chip8_fontset = {
     0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
-Chip8::Chip8(const std::string& rom_name)
+Chip8::Chip8()
   : cpu_ {}
   , memory_ {}
   , display_ {}
@@ -45,24 +46,31 @@ Chip8::Chip8(const std::string& rom_name)
         memory_[i] = chip8_fontset[i];
     }
 
-    FILE *rom = 0;
+    std::cout << "Chip8 successfully initialized.\n\n";
+}
+
+void Chip8::LoadRom(const std::string& rom_name) {
+    FILE *rom {};
     rom = fopen(rom_name.c_str(), "rb");
 
     if (!rom) {
-        // TODO: Some exception
-        std::cout << "Failed to open file!\n";
-        return;
+        throw std::runtime_error("File couldn't be opened or doesn't exist");
     }
 
     fread(&memory_[0x200], kRamSize - 0x200, 1, rom);
 
-
-    std::cout << "Chip8 successfully initialized. Launching: " << rom_name << "\n";
+    std::cout << "Loaded: " << rom_name << ". Launching...\n\n";
 }
 
 void Chip8::Play() {
     auto time {std::chrono::system_clock::now().time_since_epoch()};
     auto time_ms {std::chrono::duration_cast<std::chrono::milliseconds>(time).count()};
+
+    // Seed rand
+    srand(time.count());
+
+    // Initialize the display for rendering
+    display_.Init();
 
     // Each run of the loop is 1 emulation cycle
     while (cpu_.pc < Memory::kRamSize - 1) {
@@ -84,7 +92,7 @@ void Chip8::Play() {
         }
 
         if (cpu_.t_sound > 0) {
-            std::cout << "BEEP";
+            std::cout << "BEEP\n";
             --cpu_.t_sound;
         }
 
